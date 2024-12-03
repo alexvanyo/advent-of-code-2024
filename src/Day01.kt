@@ -23,13 +23,15 @@ fun main() {
     }
 
     // Test if implementation meets criteria from the description, like:
-    check(part1(
+    check(
+        part1(
         ("3   4\n" +
             "4   3\n" +
             "2   5\n" +
             "1   3\n" +
             "3   9\n" +
-            "3   3").lines().toList()).also { it.println() } == 11)
+            "3   3").lines().toList()
+    ).also { it.println() } == 11)
 
     // Or read a large test input from the `src/Day01_test.txt` file:
     //val testInput = readInput("Day01_test")
