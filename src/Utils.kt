@@ -8,6 +8,11 @@ import kotlin.io.path.readText
  */
 fun readInput(name: String) = Path("src/$name.txt").readText().trim().lines()
 
+fun String.parseIntPair(): Pair<Int, Int> {
+    val (a, b) = split(Regex("\\s+"))
+    return a.toInt() to b.toInt()
+}
+
 /**
  * Converts string to md5 hash.
  */
