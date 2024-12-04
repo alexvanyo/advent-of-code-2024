@@ -74,12 +74,9 @@ fun main() {
                     val sw = inputCharArray.getOrNull(row + 1)?.getOrNull(col - 1)
                     val se = inputCharArray.getOrNull(row + 1)?.getOrNull(col + 1)
 
-                    if ((nw == 'S' || nw == 'M') && (ne == 'S' || ne == 'M') &&
-                        (sw == 'S' || sw == 'M') && (se == 'S' || se == 'M')) {
-                        if (((nw == 'S' && se == 'M') || (nw == 'M' && se == 'S')) &&
-                            ((sw == 'S' && ne == 'M') || (sw == 'M' && ne == 'S'))) {
-                            count++
-                        }
+                    if (((nw == 'S' && se == 'M') || (nw == 'M' && se == 'S')) &&
+                        ((sw == 'S' && ne == 'M') || (sw == 'M' && ne == 'S'))) {
+                        count++
                     }
                 }
             }
