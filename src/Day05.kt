@@ -1,12 +1,7 @@
 fun main() {
-    fun part1(rules: List<String>, updates: List<String>): Int {
-        val parsedRules = rules.map {
-            val (a, b) = it.split("|")
-            a.toInt() to b.toInt()
-        }
-        return updates.sumOf { update ->
-            val updateValues = update.split(",").map(String::toInt)
-            val updateValuesMap = updateValues.withIndex().associate { (index, value) -> value to index }
+    fun part1(parsedRules: List<Pair<Int, Int>>, parsedUpdates: List<List<Int>>): Int =
+        parsedUpdates.sumOf { parsedUpdate ->
+            val updateValuesMap = parsedUpdate.withIndex().associate { (index, value) -> value to index }
             if (
                 parsedRules.all { (a, b) ->
                     val startIndex = updateValuesMap.getOrElse(a) { null }
@@ -14,12 +9,11 @@ fun main() {
                     startIndex == null || endIndex == null || startIndex < endIndex
                 }
             ) {
-                updateValues[updateValues.size / 2]
+                parsedUpdate[parsedUpdate.size / 2]
             } else {
                 0
             }
         }
-    }
 
     fun createOrder(
         pages: List<Int>,
@@ -28,43 +22,29 @@ fun main() {
         val pageSet = pages.toSet()
         val mapToNext =
             parsedRules
-                .groupBy { it.first }
-                .mapValues { it.value.map { it.second }.filter { it in pageSet } }
-                .filterValues { it.isNotEmpty() }
-                .filterKeys { it in pageSet }
-        val seedPages = pages.toMutableSet()
-        mapToNext.values.forEach {
-            it.forEach {
-                seedPages.remove(it)
-            }
-        }
+                .groupBy(Pair<Int, Int>::first)
+                .mapValues { it.value.map(Pair<Int, Int>::second).filter(pageSet::contains) }
+                .filterValues(Collection<Int>::isNotEmpty)
+                .filterKeys(pageSet::contains)
         val coveredPages = mutableSetOf<Int>()
         val order = mutableListOf<Int>()
 
         fun depthFirst(page: Int) {
             if (page in coveredPages) return
-            mapToNext[page]?.forEach {
-                depthFirst(it)
-            }
+            mapToNext[page]?.forEach(::depthFirst)
             order.add(page)
             coveredPages.add(page)
         }
+        pageSet.forEach(::depthFirst)
 
-        seedPages.forEach {
-            depthFirst(it)
+        return order.also {
+            it.println()
         }
-
-        return order
     }
 
-    fun part2(rules: List<String>, updates: List<String>): Int {
-        val parsedRules = rules.map {
-            val (a, b) = it.split("|")
-            a.toInt() to b.toInt()
-        }
-        return updates.sumOf { update ->
-            val updateValues = update.split(",").map(String::toInt)
-            val updateValuesMap = updateValues.withIndex().associate { (index, value) -> value to index }
+    fun part2(parsedRules: List<Pair<Int, Int>>, parsedUpdates: List<List<Int>>): Int =
+        parsedUpdates.sumOf { parsedUpdate ->
+            val updateValuesMap = parsedUpdate.withIndex().associate { (index, value) -> value to index }
             if (
                 parsedRules.all { (a, b) ->
                     val startIndex = updateValuesMap.getOrElse(a) { null }
@@ -74,25 +54,31 @@ fun main() {
             ) {
                 0
             } else {
-                createOrder(updateValues, parsedRules)[updateValues.size / 2]
+                createOrder(parsedUpdate, parsedRules)[parsedUpdate.size / 2]
             }
         }
+
+    fun readInputDay5(name: String): Pair<List<Pair<Int, Int>>, List<List<Int>>> {
+        val input = readInput(name)
+        val blankLineIndex = input.indexOf("")
+        val rules = input.subList(0, blankLineIndex)
+        val updates = input.subList(blankLineIndex + 1, input.size)
+        val parsedRules = rules.map {
+            val (a, b) = it.split("|")
+            a.toInt() to b.toInt()
+        }
+        val parsedUpdates = updates.map { update ->
+            update.split(",").map(String::toInt)
+        }
+        return parsedRules to parsedUpdates
     }
 
     // Or read a large test input from the `src/Day05_test.txt` file:
-    val testInput = readInput("Day05_test")
-    val testInputBlankLineIndex = testInput.indexOf("")
-    val testInputRules = testInput.subList(0, testInputBlankLineIndex)
-    val testInputUpdates = testInput.subList(testInputBlankLineIndex + 1, testInput.size)
-
-    check(part1(testInputRules, testInputUpdates) == 143)
+    val (testInputParsedRules, testInputParsedUpdates) = readInputDay5("Day05_test")
+    check(part2(testInputParsedRules, testInputParsedUpdates) == 123)
 
     // Read the input from the `src/Day05.txt` file.
-    val input = readInput("Day05")
-
-    val inputBlankLineIndex = input.indexOf("")
-    val inputRules = input.subList(0, inputBlankLineIndex)
-    val inputUpdates = input.subList(inputBlankLineIndex + 1, input.size)
-    part1(inputRules, inputUpdates).println()
-    part2(inputRules, inputUpdates).println()
+    val (inputParsedRules, inputParsedUpdates) = readInputDay5("Day05")
+    part1(inputParsedRules, inputParsedUpdates).println()
+    part2(inputParsedRules, inputParsedUpdates).println()
 }
