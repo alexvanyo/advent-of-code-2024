@@ -33,3 +33,10 @@ fun <T> List<T>.removeIndices(vararg indices: Int): List<T> =
 
 fun <T> List<T>.removeIndices(indices: Set<Int>): List<T> =
     filterIndexed { index, _ -> index !in indices }
+
+sealed interface Direction {
+    data object Up : Direction
+    data object Down : Direction
+    data object Left : Direction
+    data object Right : Direction
+}

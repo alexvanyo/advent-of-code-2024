@@ -162,10 +162,3 @@ fun main() {
     part1(input).println()
     part2(input).println()
 }
-
-sealed interface Direction {
-    data object Up : Direction
-    data object Down : Direction
-    data object Left : Direction
-    data object Right : Direction
-}
