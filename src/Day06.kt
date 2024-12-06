@@ -1,3 +1,4 @@
+import androidx.compose.ui.unit.IntOffset
 import kotlin.properties.Delegates
 
 fun main() {
@@ -6,50 +7,46 @@ fun main() {
             it.toCharArray().toMutableList()
         }
 
-        var guardX by Delegates.notNull<Int>()
-        var guardY by Delegates.notNull<Int>()
+        var guardPosition: IntOffset by Delegates.notNull()
         lateinit var guardDirection: Direction
 
         state.indices.forEach { row ->
             state[row].indices.forEach { col ->
+                val pos = IntOffset(col, row)
+
                 if (state[row][col] == '>') {
-                    guardX = col
-                    guardY = row
+                    guardPosition = pos
                     guardDirection = Direction.Right
                     state[row][col] = '.'
                 } else if (state[row][col] == '<') {
-                    guardX = col
-                    guardY = row
+                    guardPosition = pos
                     guardDirection = Direction.Left
                     state[row][col] = '.'
                 } else if (state[row][col] == '^') {
-                    guardX = col
-                    guardY = row
+                    guardPosition = pos
                     guardDirection = Direction.Up
                     state[row][col] = '.'
                 } else if (state[row][col] == 'v') {
-                    guardX = col
-                    guardY = row
+                    guardPosition = pos
                     guardDirection = Direction.Down
                     state[row][col] = '.'
                 }
             }
         }
 
-        val positionSet = mutableSetOf(guardX to guardY)
+        val positionSet = mutableSetOf(guardPosition)
 
         while (true) {
             val frontOffset = when (guardDirection) {
-                Direction.Down -> 0 to 1
-                Direction.Left -> -1 to 0
-                Direction.Right -> 1 to 0
-                Direction.Up -> 0 to -1
+                Direction.Down -> IntOffset(0, 1)
+                Direction.Left -> IntOffset(-1, 0)
+                Direction.Right -> IntOffset(1, 0)
+                Direction.Up -> IntOffset(0, -1)
             }
 
-            val frontPositionX = guardX + frontOffset.first
-            val frontPositionY = guardY + frontOffset.second
+            val frontPosition = guardPosition + frontOffset
 
-            when (state.getOrNull(frontPositionY)?.getOrNull(frontPositionX)) {
+            when (state.getOrNull(frontPosition.y)?.getOrNull(frontPosition.x)) {
                 null -> break
                 '#' -> {
                     guardDirection = when (guardDirection) {
@@ -60,9 +57,8 @@ fun main() {
                     }
                 }
                 '.' -> {
-                    guardX = frontPositionX
-                    guardY = frontPositionY
-                    positionSet.add(guardX to guardY)
+                    guardPosition = frontPosition
+                    positionSet.add(guardPosition)
                 }
             }
         }
@@ -75,30 +71,27 @@ fun main() {
             it.toCharArray().toMutableList()
         }
 
-        var initialGuardX by Delegates.notNull<Int>()
-        var initialGuardY by Delegates.notNull<Int>()
+        var initialGuardPosition: IntOffset by Delegates.notNull()
         lateinit var initialGuardDirection: Direction
 
         state.indices.forEach { row ->
             state[row].indices.forEach { col ->
+                val pos = IntOffset(col, row)
+
                 if (state[row][col] == '>') {
-                    initialGuardX = col
-                    initialGuardY = row
+                    initialGuardPosition = pos
                     initialGuardDirection = Direction.Right
                     state[row][col] = '.'
                 } else if (state[row][col] == '<') {
-                    initialGuardX = col
-                    initialGuardY = row
+                    initialGuardPosition = pos
                     initialGuardDirection = Direction.Left
                     state[row][col] = '.'
                 } else if (state[row][col] == '^') {
-                    initialGuardX = col
-                    initialGuardY = row
+                    initialGuardPosition = pos
                     initialGuardDirection = Direction.Up
                     state[row][col] = '.'
                 } else if (state[row][col] == 'v') {
-                    initialGuardX = col
-                    initialGuardY = row
+                    initialGuardPosition = pos
                     initialGuardDirection = Direction.Down
                     state[row][col] = '.'
                 }
@@ -109,28 +102,26 @@ fun main() {
 
         state.indices.forEach { row ->
             state[row].indices.forEach { col ->
+                val pos = IntOffset(col, row)
 
-                if ((row != initialGuardY || col != initialGuardX) && state[row][col] == '.') {
+                if (pos != initialGuardPosition && state[row][col] == '.') {
                     state[row][col] = 'O'
-
-                    var guardX = initialGuardX
-                    var guardY = initialGuardY
+                    var guardPosition = initialGuardPosition
                     var guardDirection = initialGuardDirection
 
-                    val positionSet = mutableSetOf(Triple(initialGuardX, guardY, guardDirection))
+                    val positionSet = mutableSetOf(guardPosition to guardDirection)
 
                     while (true) {
                         val frontOffset = when (guardDirection) {
-                            Direction.Down -> 0 to 1
-                            Direction.Left -> -1 to 0
-                            Direction.Right -> 1 to 0
-                            Direction.Up -> 0 to -1
+                            Direction.Down -> IntOffset(0, 1)
+                            Direction.Left -> IntOffset(-1, 0)
+                            Direction.Right -> IntOffset(1, 0)
+                            Direction.Up -> IntOffset(0, -1)
                         }
 
-                        val frontPositionX = guardX + frontOffset.first
-                        val frontPositionY = guardY + frontOffset.second
+                        val frontPosition = guardPosition + frontOffset
 
-                        when (state.getOrNull(frontPositionY)?.getOrNull(frontPositionX)) {
+                        when (state.getOrNull(frontPosition.y)?.getOrNull(frontPosition.x)) {
                             null -> break
                             '#', 'O' -> {
                                 guardDirection = when (guardDirection) {
@@ -141,9 +132,8 @@ fun main() {
                                 }
                             }
                             '.' -> {
-                                guardX = frontPositionX
-                                guardY = frontPositionY
-                                val newPosition = Triple(guardX, guardY, guardDirection)
+                                guardPosition = frontPosition
+                                val newPosition = guardPosition to guardDirection
 
                                 if (newPosition in positionSet) {
                                     newObstacleCount++

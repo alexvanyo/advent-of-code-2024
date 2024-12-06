@@ -5,6 +5,10 @@ plugins {
 sourceSets {
     main {
         kotlin.srcDir("src")
+        dependencies {
+            implementation("org.jetbrains.compose.ui:ui-unit:1.7.1")
+            implementation("org.jetbrains.compose.ui:ui-geometry:1.7.1")
+        }
     }
 }
 
