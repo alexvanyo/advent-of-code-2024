@@ -18,11 +18,9 @@ fun main() {
 
         val antennaGroupings = antennas.groupBy { it.first }.mapValues { it.value.map { it.second } }
 
-        println(antennaGroupings)
-
         val antinodes = mutableSetOf<IntOffset>()
 
-        antennaGroupings.entries.forEach { (char, antennaLocations) ->
+        antennaGroupings.entries.forEach { (_, antennaLocations) ->
             antennaLocations.forEach { a ->
                 antennaLocations.forEach { b ->
                     if (a != b) {
@@ -63,20 +61,15 @@ fun main() {
 
         val antennaGroupings = antennas.groupBy { it.first }.mapValues { it.value.map { it.second } }
 
-        println(antennaGroupings)
-
         val antinodes = mutableSetOf<IntOffset>()
 
-        antennaGroupings.entries.forEach { (char, antennaLocations) ->
+        antennaGroupings.entries.forEach { (_, antennaLocations) ->
             antennaLocations.forEach { a ->
                 antennaLocations.forEach { b ->
                     if (a != b) {
                         val diff = b - a
                         val gcd = gcd(abs(diff.x), abs(diff.y))
                         val adjustedDiff = diff / gcd.toFloat()
-                        if (gcd > 1) {
-                            println("diff: $diff, gcd: ${gcd(abs(diff.x), abs(diff.y))}")
-                        }
 
                         var downCurr = a
                         while (downCurr.isValid()) {
@@ -93,8 +86,6 @@ fun main() {
                 }
             }
         }
-
-        println(antinodes)
 
         return antinodes.size
     }
