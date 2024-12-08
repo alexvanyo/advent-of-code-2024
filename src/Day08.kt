@@ -99,16 +99,3 @@ fun main() {
     part1(input).println()
     part2(input).println()
 }
-
-fun gcd(a: Int, b: Int): Int {
-    var num1 = a
-    var num2 = b
-    while (num1 != num2) {
-        if (num1 > num2) {
-            num1 -= num2
-        } else {
-            num2 -= num1
-        }
-    }
-    return num1
-}

@@ -2,6 +2,7 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readText
+import kotlin.math.abs
 
 /**
  * Reads lines from the given input txt file.
@@ -40,3 +41,7 @@ sealed interface Direction {
     data object Left : Direction
     data object Right : Direction
 }
+
+tailrec fun gcd(a: Int, b: Int): Int =
+    if (b == 0) abs(a) else gcd(b, a.mod(b))
+
