@@ -45,3 +45,5 @@ sealed interface Direction {
 tailrec fun gcd(a: Int, b: Int): Int =
     if (b == 0) abs(a) else gcd(b, a.mod(b))
 
+tailrec fun gcd(a: Long, b: Long): Long =
+    if (b == 0L) abs(a) else gcd(b, a.mod(b))
