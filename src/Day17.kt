@@ -1,12 +1,4 @@
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-
-suspend fun main() {
+fun main() {
     data class State(
         val a: Long,
         val b: Long,
