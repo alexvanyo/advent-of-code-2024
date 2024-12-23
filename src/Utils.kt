@@ -1,3 +1,4 @@
+import androidx.compose.ui.unit.IntOffset
 import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
@@ -47,3 +48,5 @@ tailrec fun gcd(a: Int, b: Int): Int =
 
 tailrec fun gcd(a: Long, b: Long): Long =
     if (b == 0L) abs(a) else gcd(b, a.mod(b))
+
+val IntOffset.manhattanDistance get() = abs(x) + abs(y)

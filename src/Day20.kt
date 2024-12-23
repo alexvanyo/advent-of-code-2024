@@ -129,5 +129,3 @@ fun main() {
     part1(input, 100).println()
     part2(input, 100).println()
 }
-
-val IntOffset.manhattanDistance get() = abs(x) + abs(y)
