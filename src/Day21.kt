@@ -217,6 +217,116 @@ sealed class DirectionalKey(
     }
 }
 
+data class MemoizedInput(
+    val keys: List<DirectionalKey>,
+    val remainingDirectionalKeypads: Int,
+) {
+    init {
+        require(keys.last() == DirectionalKey.A)
+    }
+}
+
+val memoizedMap = mutableMapOf<MemoizedInput, Long>()
+
+fun shortestNumericalKeySubsequence(
+    keys: List<NumericKey>,
+    numDirectionalKeypads: Int,
+): Long =
+    (listOf(NumericKey.A) + keys).zipWithNext()
+        .sumOf { (a, b) ->
+            val diff = b.position - a.position
+
+            val lefts = if (diff.x < 0) {
+                List(-diff.x) { DirectionalKey.Left }
+            } else {
+                emptyList()
+            }
+            val rights = if (diff.x > 0) {
+                List(diff.x) { DirectionalKey.Right }
+            } else {
+                emptyList()
+            }
+            val ups = if (diff.y < 0) {
+                List(-diff.y) { DirectionalKey.Up }
+            } else {
+                emptyList()
+            }
+            val downs = if (diff.y > 0) {
+                List(diff.y) { DirectionalKey.Down }
+            } else {
+                emptyList()
+            }
+
+            setOfNotNull(
+                (lefts + ups + downs + rights + DirectionalKey.A).takeUnless {
+                    (a.position.x == 0 && b.position.y == 3) ||
+                            (b.position.x == 0 && a.position.y == 3)
+                },
+                rights + ups + downs + lefts + DirectionalKey.A,
+            ).minOf { keySubsequence ->
+                shortestKeySequence(
+                    MemoizedInput(
+                        keys = keySubsequence,
+                        remainingDirectionalKeypads = numDirectionalKeypads,
+                    )
+                )
+            }
+        }
+
+fun shortestKeySequence(
+    memoizedInput: MemoizedInput,
+): Long =
+    if (memoizedInput in memoizedMap) {
+        memoizedMap[memoizedInput]!!
+    } else {
+        if (memoizedInput.remainingDirectionalKeypads == 0) {
+            memoizedInput.keys.size.toLong()
+        } else {
+            (listOf(DirectionalKey.A) + memoizedInput.keys).zipWithNext()
+                .sumOf { (a, b) ->
+                    val diff = b.position - a.position
+
+                    val lefts = if (diff.x < 0) {
+                        List(-diff.x) { DirectionalKey.Left }
+                    } else {
+                        emptyList()
+                    }
+                    val rights = if (diff.x > 0) {
+                        List(diff.x) { DirectionalKey.Right }
+                    } else {
+                        emptyList()
+                    }
+                    val ups = if (diff.y < 0) {
+                        List(-diff.y) { DirectionalKey.Up }
+                    } else {
+                        emptyList()
+                    }
+                    val downs = if (diff.y > 0) {
+                        List(diff.y) { DirectionalKey.Down }
+                    } else {
+                        emptyList()
+                    }
+
+                    setOfNotNull(
+                        (ups + rights + lefts + downs + DirectionalKey.A).takeUnless {
+                            (a.position.x == 0 && b.position.y == 0) ||
+                                    (b.position.x == 0 && a.position.y == 0)
+                        },
+                        downs + lefts + rights + ups + DirectionalKey.A,
+                    ).minOf { keySubsequence ->
+                        shortestKeySequence(
+                            MemoizedInput(
+                                keys = keySubsequence,
+                                remainingDirectionalKeypads = memoizedInput.remainingDirectionalKeypads - 1,
+                            )
+                        )
+                    }
+                }
+        }.also {
+            memoizedMap[memoizedInput] = it
+        }
+    }
+
 fun greedyNumericalKeys(
     keys: List<NumericKey>
 ): List<DirectionalKey> =
@@ -410,12 +520,29 @@ fun main() {
         )
 
     fun part(input: List<String>, numDirectionalKeypads: Int): Long {
+        println("part: $input, $numDirectionalKeypads")
+
         val parsedInput = parseInput(input)
 
         return parsedInput.codes.sumOf { code ->
             val shortestSequence = search(
                 keys = code.keys,
                 initialKeypadPositions = listOf(NumericKey.A.position) + List(numDirectionalKeypads) { DirectionalKey.A.position },
+            )
+            println("finished: $code, $shortestSequence")
+            shortestSequence * code.value
+        }
+    }
+
+    fun partAlpha(input: List<String>, numDirectionalKeypads: Int): Long {
+        println("partAlpha: $input, $numDirectionalKeypads")
+
+        val parsedInput = parseInput(input)
+
+        return parsedInput.codes.sumOf { code ->
+            val shortestSequence = shortestNumericalKeySubsequence(
+                code.keys,
+                numDirectionalKeypads,
             )
             println("finished: $code, $shortestSequence")
             shortestSequence * code.value
@@ -473,12 +600,15 @@ fun main() {
     val testInput = readInput("Day21_test")
 
     check(part(testInput, 2).also(::println) == 126384L)
-    check(greedyPart(testInput, 2) == part(testInput, 2))
+    check(partAlpha(testInput, 2) == part(testInput, 2))
 
     // Read the input from the `src/Day21.txt` file.
     val input = readInput("Day21")
-    greedyPart(input, 2).println()
+
+    check(partAlpha(input, 3) == part(input, 3))
+
+    partAlpha(input, 2).println()
     part(input, 2).println()
-    greedyPart(input, 25).println()
+    partAlpha(input, 25).println()
     part(input, 25).println()
 }
