@@ -327,80 +327,6 @@ fun shortestKeySequence(
         }
     }
 
-fun greedyNumericalKeys(
-    keys: List<NumericKey>
-): List<DirectionalKey> =
-    (listOf(NumericKey.A) + keys).zipWithNext()
-        .flatMap { (a, b) ->
-            val diff = b.position - a.position
-
-            val lefts = if (diff.x < 0) {
-                List(-diff.x) { DirectionalKey.Left }
-            } else {
-                emptyList()
-            }
-            val rights = if (diff.x > 0) {
-                List(diff.x) { DirectionalKey.Right }
-            } else {
-                emptyList()
-            }
-            val ups = if (diff.y < 0) {
-                List(-diff.y) { DirectionalKey.Up }
-            } else {
-                emptyList()
-            }
-            val downs = if (diff.y > 0) {
-                List(diff.y) { DirectionalKey.Down }
-            } else {
-                emptyList()
-            }
-
-            if (a.position.y == 3 && b.position.x == 0) {
-                ups + rights + lefts + downs
-            } else {
-                lefts + ups + rights + downs
-            } + DirectionalKey.A
-        }
-
-fun greedyDirectionalKeys(
-    keys: List<DirectionalKey>
-): List<DirectionalKey> =
-    (listOf(DirectionalKey.A) + keys).zipWithNext()
-        .flatMap { (a, b) ->
-            val diff = b.position - a.position
-
-            val lefts = if (diff.x < 0) {
-                List(-diff.x) { DirectionalKey.Left }
-            } else {
-                emptyList()
-            }
-            val rights = if (diff.x > 0) {
-                List(diff.x) { DirectionalKey.Right }
-            } else {
-                emptyList()
-            }
-            val ups = if (diff.y < 0) {
-                List(-diff.y) { DirectionalKey.Up }
-            } else {
-                emptyList()
-            }
-            val downs = if (diff.y > 0) {
-                List(diff.y) { DirectionalKey.Down }
-            } else {
-                emptyList()
-            }
-
-            val rightsUps = if (a.position == DirectionalKey.Left.position) {
-                rights + ups
-            } else {
-                ups + rights
-            }
-            val downsLefts =                 lefts + downs
-
-
-            downsLefts + rightsUps + DirectionalKey.A
-        }
-
 fun main() {
     data class Code(
         val keys: List<NumericKey>,
@@ -519,9 +445,7 @@ fun main() {
             }
         )
 
-    fun part(input: List<String>, numDirectionalKeypads: Int): Long {
-        println("part: $input, $numDirectionalKeypads")
-
+    fun partSearch(input: List<String>, numDirectionalKeypads: Int): Long {
         val parsedInput = parseInput(input)
 
         return parsedInput.codes.sumOf { code ->
@@ -529,14 +453,11 @@ fun main() {
                 keys = code.keys,
                 initialKeypadPositions = listOf(NumericKey.A.position) + List(numDirectionalKeypads) { DirectionalKey.A.position },
             )
-            println("finished: $code, $shortestSequence")
             shortestSequence * code.value
         }
     }
 
-    fun partAlpha(input: List<String>, numDirectionalKeypads: Int): Long {
-        println("partAlpha: $input, $numDirectionalKeypads")
-
+    fun partFast(input: List<String>, numDirectionalKeypads: Int): Long {
         val parsedInput = parseInput(input)
 
         return parsedInput.codes.sumOf { code ->
@@ -544,71 +465,21 @@ fun main() {
                 code.keys,
                 numDirectionalKeypads,
             )
-            println("finished: $code, $shortestSequence")
             shortestSequence * code.value
-        }
-    }
-
-    fun greedyPart1(input: List<String>): Long {
-        val parsedInput = parseInput(input)
-
-        return parsedInput.codes.sumOf { code ->
-            val directionalKeys = greedyNumericalKeys(code.keys)
-            generateSequence(directionalKeys, ::greedyDirectionalKeys).take(3)
-                .onEach {
-                    println("directionalKeys: ${it.size} ${it.map { when (it) {
-                        DirectionalKey.A -> 'A'
-                        DirectionalKey.Down -> 'v'
-                        DirectionalKey.Left -> '<'
-                        DirectionalKey.Right -> '>'
-                        DirectionalKey.Up -> '^'
-                    }
-                    }.joinToString("")}")
-                }
-                .last().size.toLong() * code.value
-        }
-    }
-
-    fun part2(input: List<String>): Long {
-        val parsedInput = parseInput(input)
-
-        return parsedInput.codes.sumOf { code ->
-            val shortestSequence = search(
-                keys = code.keys,
-                initialKeypadPositions = listOf(NumericKey.A.position) + List(4) { DirectionalKey.A.position },
-            )
-            println("finished: $code, $shortestSequence")
-            shortestSequence * code.value
-        }
-    }
-
-    fun greedyPart(input: List<String>, directionalKeypads: Int): Long {
-        val parsedInput = parseInput(input)
-
-        return parsedInput.codes.sumOf { code ->
-            val directionalKeys = greedyNumericalKeys(code.keys)
-            generateSequence(directionalKeys, ::greedyDirectionalKeys)
-                .take(directionalKeypads + 1)
-                .onEach {
-                    println("directionalKeys: $it")
-                }
-                .last().size.toLong() * code.value
         }
     }
 
     // Or read a large test input from the `src/Day21_test.txt` file:
     val testInput = readInput("Day21_test")
 
-    check(part(testInput, 2).also(::println) == 126384L)
-    check(partAlpha(testInput, 2) == part(testInput, 2))
+    check(partFast(testInput, 2).also(::println) == 126384L)
+    check(partSearch(testInput, 2) == partFast(testInput, 2))
 
     // Read the input from the `src/Day21.txt` file.
     val input = readInput("Day21")
 
-    check(partAlpha(input, 3) == part(input, 3))
+    check(partSearch(input, 3) == partFast(input, 3))
 
-    partAlpha(input, 2).println()
-    part(input, 2).println()
-    partAlpha(input, 25).println()
-    part(input, 25).println()
+    partFast(input, 2).println()
+    partFast(input, 25).println()
 }
